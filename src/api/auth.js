@@ -8,6 +8,10 @@
  * 
  * 这些函数都依赖于统一的 HTTP 请求工具(request.js)来处理网络请求
  * 和错误处理
+ * 
+ * ⚠️ 重要说明：
+ * 响应拦截器（在 request.js 中）已经提取了响应数据中的 data 字段，
+ * 因此所有 API 函数直接返回 response 即可，无需再访问 response.data
  */
 
 // 导入统一的 HTTP 请求工具
@@ -47,7 +51,7 @@ export const login = async (credentials) => {
          * - 请求/响应转换
          */
         const response = await request.post('/auth/login', credentials)
-        
+
         /**
          * 响应数据格式（示例）：
          * {
@@ -103,7 +107,7 @@ export const logout = async () => {
          * 因为用户的意图是明确的（要登出）
          */
         const response = await request.post('/auth/logout')
-        
+
         /**
          * 响应数据格式（示例）：
          * {
@@ -111,7 +115,7 @@ export const logout = async () => {
          *   message: '登出成功'
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理
@@ -120,7 +124,7 @@ export const logout = async () => {
          * 但这不应该阻止用户在前端登出
          */
         console.error('登出请求失败:', error)
-        
+
         // 即使请求失败，也返回成功状态，
         // 因为用户的登出意图是明确的
         return { success: true, message: '本地登出完成' }
@@ -159,7 +163,7 @@ export const getCurrentUser = async () => {
          * (在 request.js 的请求拦截器中设置)
          */
         const response = await request.get('/auth/profile')
-        
+
         /**
          * 响应数据格式（示例）：
          * {
@@ -187,7 +191,7 @@ export const getCurrentUser = async () => {
          * 这些错误通常表明用户需要重新登录
          */
         console.error('获取用户信息失败:', error)
-        
+
         // 重新抛出错误，让调用者可以决定如何处理
         // (例如：重定向到登录页面)
         throw error
@@ -220,7 +224,7 @@ export const refreshToken = async (refreshToken) => {
         const response = await request.post('/auth/refresh', {
             refreshToken
         })
-        
+
         /**
          * 响应数据格式（示例）：
          * {
@@ -232,7 +236,7 @@ export const refreshToken = async (refreshToken) => {
          *   }
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理

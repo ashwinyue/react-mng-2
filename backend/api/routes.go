@@ -44,10 +44,7 @@ func RegisterRoutes(r *gin.Engine) {
 			roles.POST("", roleCtrl.Create)
 			roles.PUT("/:id", roleCtrl.Update)
 			roles.DELETE("/:id", roleCtrl.Delete)
-			roles.GET("/:id/permissions", roleCtrl.GetPermissions)
-			roles.POST("/:id/permissions", roleCtrl.AssignPermissions)
 		}
-
 
 	}
 }

@@ -10,6 +10,10 @@
  * 
  * 这些函数都依赖于统一的 HTTP 请求工具(request.js)来处理网络请求
  * 和错误处理，统一处理认证头和错误响应
+ * 
+ * ⚠️ 重要说明：
+ * 响应拦截器（在 request.js 中）已经提取了响应数据中的 data 字段，
+ * 因此所有 API 函数直接返回 response 即可，无需再访问 response.data
  */
 
 // 导入统一的 HTTP 请求工具
@@ -172,7 +176,7 @@ export const getUserDetail = async (userId) => {
          *   }
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理
@@ -197,7 +201,7 @@ export const getUserDetail = async (userId) => {
  * 
  * @param {Object} userData - 新用户的数据
  * @param {string} userData.username - 用户名（唯一）
- * @param {string} userData.name - 用户姓名
+ * @param {string} userData.realname - 用户真实姓名
  * @param {string} userData.email - 用户邮箱（唯一）
  * @param {string} userData.password - 用户密码
  * @param {string} [userData.role] - 用户角色（默认：user）
@@ -212,7 +216,7 @@ export const getUserDetail = async (userId) => {
  * try {
  *   const newUser = await createUser({
  *     username: 'new_user',
- *     name: '新用户',
+ *     realname: '新用户',
  *     email: 'newuser@example.com',
  *     password: 'password123',
  *     role: 'user'
@@ -230,8 +234,10 @@ export const createUser = async (userData) => {
          * 
          * 确保必需字段都存在且有效
          * 这里只做基本的验证，详细的验证逻辑通常在后端处理
+         * 
+         * 注意：后端使用 'realname' 字段而不是 'name'
          */
-        const requiredFields = ['username', 'name', 'email', 'password']
+        const requiredFields = ['username', 'realname', 'email', 'password']
         const missingFields = requiredFields.filter(field => !userData[field])
 
         if (missingFields.length > 0) {
@@ -254,7 +260,7 @@ export const createUser = async (userData) => {
          *   data: {
          *     id: 124,
          *     username: 'new_user',
-         *     name: '新用户',
+         *     realname: '新用户',
          *     email: 'newuser@example.com',
          *     status: 'active',
          *     role: 'user',
@@ -262,7 +268,7 @@ export const createUser = async (userData) => {
          *   }
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理
@@ -352,7 +358,7 @@ export const updateUser = async (userId, updateData) => {
          *   }
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理
@@ -421,7 +427,7 @@ export const deleteUser = async (userId) => {
          *   message: '用户删除成功'
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         /**
          * 错误处理
@@ -499,7 +505,7 @@ export const batchDeleteUsers = async (userIds) => {
          *   }
          * }
          */
-        return response.data
+        return response
     } catch (error) {
         console.error('批量删除用户失败:', error)
         throw error

@@ -12,15 +12,13 @@ import (
 
 // RoleController 角色控制器
 type RoleController struct {
-	roleService         *services.RoleService
-	permissionService   *services.PermissionService
+	roleService *services.RoleService
 }
 
 // NewRoleController 创建角色控制器
 func NewRoleController() *RoleController {
 	return &RoleController{
-		roleService:       &services.RoleService{},
-		permissionService: &services.PermissionService{},
+		roleService: &services.RoleService{},
 	}
 }
 
@@ -122,42 +120,6 @@ func (ctrl *RoleController) Delete(c *gin.Context) {
 
 	if err := ctrl.roleService.DeleteRole(uint(id)); err != nil {
 		c.JSON(http.StatusOK, utils.Error("删除角色失败"))
-		return
-	}
-
-	c.JSON(http.StatusOK, utils.Success(nil))
-}
-
-// GetPermissions 获取角色的权限
-func (ctrl *RoleController) GetPermissions(c *gin.Context) {
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
-
-	roleData, err := ctrl.permissionService.GetPermissionTreesWithRole(uint(id))
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, utils.Error("获取角色权限失败"))
-		return
-	}
-
-	c.JSON(http.StatusOK, utils.Success(roleData))
-}
-
-// AssignPermissionsRequest 分配权限请求
-type AssignPermissionsRequest struct {
-	PermissionIDs []uint `json:"permission_ids" binding:"required"`
-}
-
-// AssignPermissions 为角色分配权限
-func (ctrl *RoleController) AssignPermissions(c *gin.Context) {
-	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
-
-	var req AssignPermissionsRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, utils.Error("参数错误"))
-		return
-	}
-
-	if err := ctrl.permissionService.AssignPermissionsToRole(uint(id), req.PermissionIDs); err != nil {
-		c.JSON(http.StatusInternalServerError, utils.Error("分配权限失败"))
 		return
 	}
 
