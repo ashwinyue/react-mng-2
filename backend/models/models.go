@@ -4,10 +4,11 @@ import (
 	"log"
 	"time"
 
+	"react-go-admin-backend/config"
+
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
-	"react-go-admin-backend/config"
 )
 
 var DB *gorm.DB
@@ -19,6 +20,8 @@ type User struct {
 	Password  string    `gorm:"size:255;not null" json:"-"`
 	Realname  string    `gorm:"size:50" json:"realname"`
 	Email     string    `gorm:"size:100" json:"email"`
+	Phone     string    `gorm:"size:20" json:"phone"`
+	Avatar    string    `gorm:"size:255" json:"avatar"`
 	Status    int       `gorm:"default:1" json:"status"` // 1:正常 0:禁用
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
@@ -88,7 +91,7 @@ func initDefaultData() {
 	}
 
 	// 创建默认管理员
-	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("admin123"), bcrypt.DefaultCost)
+	hashedPassword, _ := bcrypt.GenerateFromPassword([]byte("123456"), bcrypt.DefaultCost)
 	admin := User{
 		Username: "admin",
 		Password: string(hashedPassword),

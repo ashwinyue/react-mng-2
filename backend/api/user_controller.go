@@ -4,10 +4,11 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/gin-gonic/gin"
 	"react-go-admin-backend/models"
 	"react-go-admin-backend/services"
 	"react-go-admin-backend/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // UserController 用户控制器
@@ -55,6 +56,8 @@ type CreateUserRequest struct {
 	Password string `json:"password" binding:"required"`
 	Realname string `json:"realname" binding:"required"`
 	Email    string `json:"email" binding:"required,email"`
+	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
 }
 
 // Create 创建用户
@@ -70,6 +73,8 @@ func (ctrl *UserController) Create(c *gin.Context) {
 		Password: req.Password,
 		Realname: req.Realname,
 		Email:    req.Email,
+		Phone:    req.Phone,
+		Avatar:   req.Avatar,
 		Status:   1,
 	}
 
@@ -86,6 +91,8 @@ type UpdateUserRequest struct {
 	Username string `json:"username"`
 	Realname string `json:"realname"`
 	Email    string `json:"email"`
+	Phone    string `json:"phone"`
+	Avatar   string `json:"avatar"`
 	Status   *int   `json:"status"`
 }
 
@@ -108,6 +115,12 @@ func (ctrl *UserController) Update(c *gin.Context) {
 	}
 	if req.Email != "" {
 		updates["email"] = req.Email
+	}
+	if req.Phone != "" {
+		updates["phone"] = req.Phone
+	}
+	if req.Avatar != "" {
+		updates["avatar"] = req.Avatar
 	}
 	if req.Status != nil {
 		updates["status"] = *req.Status

@@ -3,9 +3,10 @@ package api
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"react-go-admin-backend/services"
 	"react-go-admin-backend/utils"
+
+	"github.com/gin-gonic/gin"
 )
 
 // AuthController 认证控制器
@@ -61,6 +62,8 @@ func (ctrl *AuthController) Login(c *gin.Context) {
 			"username": user.Username,
 			"realname": user.Realname,
 			"email":    user.Email,
+			"phone":    user.Phone,
+			"avatar":   user.Avatar,
 		},
 	}))
 }
@@ -85,6 +88,47 @@ func (ctrl *AuthController) GetProfile(c *gin.Context) {
 		"username": user.Username,
 		"realname": user.Realname,
 		"email":    user.Email,
+		"phone":    user.Phone,
+		"avatar":   user.Avatar,
 		"status":   user.Status,
 	}))
+}
+
+// ChangePasswordRequest 修改密码请求
+type ChangePasswordRequest struct {
+	OldPassword string `json:"oldPassword" binding:"required"`
+	NewPassword string `json:"newPassword" binding:"required"`
+}
+
+// ChangePassword 修改密码
+func (ctrl *AuthController) ChangePassword(c *gin.Context) {
+	var req ChangePasswordRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, utils.Error("参数错误"))
+		return
+	}
+
+	userID, _ := c.Get("user_id")
+	user, err := ctrl.userService.GetUserByID(userID.(uint))
+	if err != nil {
+		c.JSON(http.StatusOK, utils.Error("获取用户信息失败"))
+		return
+	}
+
+	// 验证旧密码
+	if !ctrl.userService.VerifyPassword(user, req.OldPassword) {
+		c.JSON(http.StatusOK, utils.Error("旧密码错误"))
+		return
+	}
+
+	// 更新密码
+	updates := map[string]interface{}{
+		"password": req.NewPassword,
+	}
+	if err := ctrl.userService.UpdateUser(user.ID, updates); err != nil {
+		c.JSON(http.StatusOK, utils.Error("修改密码失败"))
+		return
+	}
+
+	c.JSON(http.StatusOK, utils.Success(nil))
 }

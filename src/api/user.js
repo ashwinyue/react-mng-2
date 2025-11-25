@@ -512,11 +512,32 @@ export const batchDeleteUsers = async (userIds) => {
     }
 }
 
+/**
+ * 修改密码
+ * 
+ * @param {string} oldPassword - 原密码
+ * @param {string} newPassword - 新密码
+ * @returns {Promise<Object>}
+ */
+export const changePassword = async (oldPassword, newPassword) => {
+    try {
+        const response = await request.post('/auth/change-password', {
+            oldPassword,
+            newPassword
+        })
+        return response
+    } catch (error) {
+        console.error('修改密码失败:', error)
+        throw error
+    }
+}
+
 export default {
     getUserList,
     getUserDetail,
     createUser,
     updateUser,
     deleteUser,
-    batchDeleteUsers
+    batchDeleteUsers,
+    changePassword
 }

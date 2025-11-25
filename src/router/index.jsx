@@ -99,6 +99,13 @@ const AppRouter = () => {
                 */}
                 <Route path="settings" element={<Settings />} />
 
+                {/* 
+                    个人信息页面
+                    - path="profile": 匹配 /profile 路径
+                    - element={<Profile />}: 渲染 Profile 组件
+                */}
+                <Route path="profile" element={<Profile />} />
+
             </Route>
 
             {/* 

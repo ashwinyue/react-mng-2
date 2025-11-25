@@ -1,8 +1,9 @@
 package api
 
 import (
-	"github.com/gin-gonic/gin"
 	"react-go-admin-backend/middleware"
+
+	"github.com/gin-gonic/gin"
 )
 
 // RegisterRoutes 注册路由
@@ -17,6 +18,7 @@ func RegisterRoutes(r *gin.Engine) {
 		auth.POST("/login", authCtrl.Login)
 		auth.POST("/logout", authCtrl.Logout)
 		auth.GET("/profile", middleware.AuthMiddleware(), authCtrl.GetProfile)
+		auth.POST("/change-password", middleware.AuthMiddleware(), authCtrl.ChangePassword)
 	}
 
 	// 需要认证的路由

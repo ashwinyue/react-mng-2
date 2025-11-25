@@ -55,7 +55,7 @@ import {
 import { useAuth } from '../context/AuthContext'
 
 // 导入 API
-import { updateUser } from '../api/user'
+import { updateUser, changePassword } from '../api/user'
 
 const { Title, Text, Paragraph } = Typography
 
@@ -88,7 +88,8 @@ const Profile = () => {
                 username: user.username,
                 realname: user.realname,
                 email: user.email,
-                phone: user.phone || ''
+                phone: user.phone || '',
+                avatar: user.avatar || ''
             })
             setAvatarUrl(user.avatar || '')
         }
@@ -100,6 +101,10 @@ const Profile = () => {
     const handleSaveInfo = async (values) => {
         setLoading(true)
         try {
+            // 如果 avatarUrl 有变化，也添加到 values 中
+            if (avatarUrl !== user.avatar) {
+                values.avatar = avatarUrl
+            }
             await updateUser(user.id, values)
             message.success('个人信息更新成功')
         } catch (error) {
@@ -123,7 +128,7 @@ const Profile = () => {
             }
 
             // 调用修改密码 API
-            // await changePassword(values.oldPassword, values.newPassword)
+            await changePassword(values.oldPassword, values.newPassword)
 
             message.success('密码修改成功，请重新登录')
             passwordForm.resetFields()
@@ -193,17 +198,14 @@ const Profile = () => {
 
                         <Divider />
 
-                        <Upload
-                            name="avatar"
-                            showUploadList={false}
-                            action="/api/upload/avatar"
-                            beforeUpload={beforeUpload}
-                            onChange={handleAvatarChange}
-                        >
-                            <Button icon={<CameraOutlined />} block>
-                                更换头像
-                            </Button>
-                        </Upload>
+                        <div style={{ marginBottom: 16 }}>
+                            <Input
+                                placeholder="输入头像 URL"
+                                value={avatarUrl}
+                                onChange={(e) => setAvatarUrl(e.target.value)}
+                                prefix={<UploadOutlined />}
+                            />
+                        </div>
 
                         <Divider />
 
