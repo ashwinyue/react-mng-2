@@ -20,9 +20,11 @@
 // useContext: 在组件中访问 Context 对象的 Hook
 // useState: 管理组件本地状态的 Hook
 // useEffect: 处理副作用的 Hook（如数据获取、DOM 操作、定时器等）
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useEffect } from 'react'
 // 导入获取当前用户信息的 API 函数
 import { getCurrentUser } from '../api/auth'
+import { useAuthStore } from '../stores'
+
 
 /**
  * 创建认证 Context
@@ -49,12 +51,15 @@ const AuthContext = createContext(null)
  */
 export const AuthProvider = ({ children }) => {
   /**
-   * 用户信息状态
-   * - user: 当前登录用户的信息对象（null 表示未登录）
-   * - loading: 加载状态，用于控制页面显示（true 时显示加载动画）
+   * Use Zustand store hooks to access state and actions
+   * This replaces the local useState and ensures the store is the single source of truth
    */
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const user = useAuthStore((state) => state.user)
+  const loading = useAuthStore((state) => state.loading)
+  const login = useAuthStore((state) => state.login)
+  const logout = useAuthStore((state) => state.logout)
+  const setUser = useAuthStore((state) => state.setUser)
+  const setLoading = useAuthStore((state) => state.setLoading)
 
   /**
    * 组件挂载时检查登录状态
@@ -98,43 +103,11 @@ export const AuthProvider = ({ children }) => {
       console.error('获取用户信息失败:', error)
       // 清除过期的 token
       localStorage.removeItem('token')
+      logout() // Use store logout action which clears state
     } finally {
       // 无论成功或失败，都要结束加载状态
       setLoading(false)
     }
-  }
-
-  /**
-   * 登录方法
-   * 
-   * @param {string} token 服务器返回的 JWT token
-   * @param {Object} userData 用户信息对象
-   * 
-   * 登录流程：
-   * 1. 将 token 存储到 localStorage（持久化）
-   * 2. 更新用户信息状态
-   * 3. 触发相关组件重新渲染
-   */
-  const login = (token, userData) => {
-    // 将 token 存储到 localStorage，实现持久化登录
-    localStorage.setItem('token', token)
-    // 更新用户信息状态
-    setUser(userData)
-  }
-
-  /**
-   * 登出方法
-   * 
-   * 登出流程：
-   * 1. 清除 localStorage 中的 token
-   * 2. 清除用户信息状态
-   * 3. 触发相关组件重新渲染
-   */
-  const logout = () => {
-    // 清除 localStorage 中的 token
-    localStorage.removeItem('token')
-    // 清除用户信息状态
-    setUser(null)
   }
 
   /**
@@ -184,12 +157,12 @@ export const AuthProvider = ({ children }) => {
 export const useAuth = () => {
   // 使用 useContext Hook 获取 Context 值
   const context = useContext(AuthContext)
-  
+
   // 如果在 AuthProvider 外部使用，context 为 null，此时抛出错误
   if (!context) {
     throw new Error('useAuth must be used within AuthProvider')
   }
-  
+
   // 返回 Context 的值
   return context
 }

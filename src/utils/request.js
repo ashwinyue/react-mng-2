@@ -9,10 +9,9 @@
  * 5. 配置管理：统一的 baseURL 和 timeout 设置
  */
 
-// 导入 Axios：基于 Promise 的 HTTP 客户端库
 import axios from 'axios'
-// 导入 Ant Design 的消息提示组件
 import { message } from 'antd'
+import { useAuthStore } from '../stores'
 
 /**
  * 创建 Axios 实例
@@ -41,37 +40,16 @@ const request = axios.create({
  * - 成功回调：请求发送前执行
  * - 错误回调：请求配置错误时执行
  */
+
 request.interceptors.request.use(
-    /**
-     * 成功回调函数
-     * 
-     * @param {Object} config 请求配置对象
-     * @returns {Object} 修改后的配置对象
-     */
     (config) => {
-        /**
-         * 从 localStorage 获取 token
-         * 
-         * localStorage 是一种浏览器本地存储，存储的数据不会过期
-         * 适用于存储认证信息（token）等敏感数据
-         * 
-         * 注意：在生产环境中，建议使用更安全的存储方式（如 httpOnly cookies）
-         */
-        const token = localStorage.getItem('token')
-        
-        /**
-         * 如果存在 token，将其添加到请求头
-         * 
-         * 认证方式：Bearer Token
-         * 格式：Authorization: Bearer <your_token_here>
-         * 
-         * 这是 RESTful API 最常用的认证方式
-         */
+        // Get token from Zustand store
+        const token = useAuthStore.getState().token
+
         if (token) {
             config.headers.Authorization = `Bearer ${token}`
         }
-        
-        // 返回修改后的配置对象，继续发送请求
+
         return config
     },
     /**
@@ -188,22 +166,22 @@ request.interceptors.response.use(
                     // 跳转到登录页面
                     window.location.href = '/login'
                     break
-                    
+
                 case 403:
                     // 403 表示权限不足，用户没有访问资源的权限
                     message.error('拒绝访问')
                     break
-                    
+
                 case 404:
                     // 404 表示请求的资源不存在
                     message.error('请求的资源不存在')
                     break
-                    
+
                 case 500:
                     // 500 表示服务器内部错误
                     message.error('服务器错误')
                     break
-                    
+
                 default:
                     // 其他状态码，使用服务器返回的错误消息
                     message.error(data?.msg || '请求失败')
